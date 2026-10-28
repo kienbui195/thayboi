@@ -180,6 +180,20 @@ describe('thayboi-api', () => {
       expect((await as(c).get(`/api/ho-so/${p.id}/la-so/chiem-tinh`)).body.chart.outdated).toBe(false);
     });
 
+    it('AC-09.2: tính lại bị lỗi thì báo lỗi, lá số cũ và tag "Bản cũ" giữ nguyên', async () => {
+      const c = await signUp('a@t.vn');
+      const p = (await as(c).post('/api/ho-so', input('Tôi'))).body;
+      await prisma.chart.updateMany({ where: { profileId: p.id, kind: 'chiem_tinh' }, data: { calcVersion: 0 } });
+      const before = (await as(c).get(`/api/ho-so/${p.id}/la-so/chiem-tinh`)).body.chart;
+      // Múi giờ hỏng thì cách tính mới ném lỗi: giả lập "tính bị lỗi"
+      await prisma.birthProfile.update({ where: { id: p.id }, data: { timezone: 'Khong/Co' } });
+      const r = await as(c).post(`/api/ho-so/${p.id}/la-so/chiem-tinh/tinh-lai`).expect(409);
+      expect(r.body.error.message).toBe('Chưa tính lại được, thử lại sau');
+      const after = (await as(c).get(`/api/ho-so/${p.id}/la-so/chiem-tinh`)).body.chart;
+      expect(after.outdated).toBe(true);
+      expect(after.data).toEqual(before.data);
+    });
+
     it('AC-02.7: lá số lưu bị lỗi thì mở ra sẽ tính lại', async () => {
       const c = await signUp('a@t.vn');
       const p = (await as(c).post('/api/ho-so', input('Tôi'))).body;
@@ -227,6 +241,19 @@ describe('thayboi-api', () => {
       const list = (await admin('get', '/nguoi-dung').expect(200)).body;
       expect(list.items[0].email).toBe('a@t.vn');
       expect(JSON.stringify(list)).not.toContain('scrypt');
+    });
+
+    it('xóa người dùng thì mất luôn phiên, hồ sơ và lá số của họ; người khác không bị ảnh hưởng', async () => {
+      const a = await signUp('a@t.vn');
+      const b = await signUp('b@t.vn');
+      const pa = (await as(a).post('/api/ho-so', input('Của A'))).body;
+      const pb = (await as(b).post('/api/ho-so', input('Của B'))).body;
+      expect((await admin('get', '/meta')).body.resources.find((r: { key: string }) => r.key === 'nguoi-dung').allowDelete).toBe(true);
+      await admin('delete', `/nguoi-dung/${pa.userId}`).expect(200);
+      await as(a).get('/api/auth/toi').expect(401);
+      expect(await prisma.birthProfile.count({ where: { userId: pa.userId } })).toBe(0);
+      expect(await prisma.chart.count({ where: { profileId: pa.id } })).toBe(0);
+      await as(b).get(`/api/ho-so/${pb.id}/la-so/tu-vi`).expect(200);
     });
   });
 });

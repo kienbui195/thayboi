@@ -5,7 +5,7 @@ import { safeEqual } from '../security/safe-equal.js';
 export const ADMIN_API_TOKEN = Symbol('ADMIN_API_TOKEN');
 
 /**
- * BR31, BR32: giao diện quản trị chỉ dành cho dashboard trong mạng Docker.
+ * Giao diện quản trị chỉ dành cho dashboard (hub) trong mạng Docker.
  * - Phải có `Authorization: Bearer <token dịch vụ>` (token tối thiểu 32 ký tự; chưa cấu hình thì từ chối hết).
  * - Từ chối yêu cầu mang dấu vết đi qua Cloudflare/Caddy (CF-Connecting-IP, X-Forwarded-For): lớp phòng thủ thứ hai
  *   phòng khi có người vô tình định tuyến /admin-api ra ngoài.

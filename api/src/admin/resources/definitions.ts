@@ -42,7 +42,10 @@ const luanGiai: ResourceDefinition = {
   },
 };
 
-/** Tài khoản: chỉ xem. Không bao giờ trả mật khẩu băm (không khai báo trường đó). */
+/**
+ * Tài khoản: xem và xóa. Xóa thì phiên, hồ sơ, lá số đi theo (khóa ngoại CASCADE).
+ * Không bao giờ trả mật khẩu băm (không khai báo trường đó).
+ */
 const users: ResourceDefinition = {
   model: 'user',
   meta: {
@@ -51,7 +54,7 @@ const users: ResourceDefinition = {
     kind: 'collection',
     primaryKey: 'id',
     allowCreate: false,
-    allowDelete: false,
+    allowDelete: true,
     actions: [],
     fields: [
       f('id', 'Mã', 'int', { readonly: true, list: true, sortable: true }),
