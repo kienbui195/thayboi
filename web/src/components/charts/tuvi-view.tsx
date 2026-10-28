@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { CUNG_TU_VI, THAN_CU } from "@/content/cung-tu-vi";
 import {
   branchHanh,
   cucHanh,
@@ -158,36 +159,39 @@ function Center({ chart, name }: { chart: TuViChart; name: string }) {
   );
 }
 
-// Thứ tự đọc luận giải: bắt đầu từ cung Mệnh
-const PALACE_ORDER = ["Mệnh", "Phụ Mẫu", "Phúc Đức", "Điền Trạch", "Quan Lộc", "Nô Bộc", "Thiên Di", "Tật Ách", "Tài Bạch", "Tử Nữ", "Phu Thê", "Huynh Đệ"];
-
 /**
- * Luận giải theo cung: mỗi sao lấy dòng `sao-cung:<sao>|<cung>` (riêng cho cung đó),
- * chính tinh không có dòng riêng thì lấy dòng chung `sao:<sao>`. Nội dung soạn trên dashboard.
+ * Luận giải theo cung: mỗi cung có lời giải thích cung đó nói về gì, rồi tới lời của từng sao:
+ * dòng `sao-cung:<sao>|<cung>` (riêng cho cung đó), chính tinh không có dòng riêng thì lấy dòng chung `sao:<sao>`.
+ * Lời của sao soạn trên dashboard.
  */
 function LuanGiaiTheoCung({ chart, luanGiai }: { chart: TuViChart; luanGiai: LuanGiaiMap }) {
   const byName = new Map(chart.palaces.map((p) => [p.name, p]));
-  const sections = PALACE_ORDER.map((name) => byName.get(name))
-    .filter((p): p is TuViPalace => !!p)
-    .map((p) => ({
-      palace: p,
-      lines: [
-        ...p.majorStars.map((s) => ({ s, l: luanGiai[`sao-cung:${s.name}|${p.name}`] ?? luanGiai[`sao:${s.name}`] })),
-        ...p.minorStars.map((s) => ({ s, l: luanGiai[`sao-cung:${s.name}|${p.name}`] })),
-      ].filter((x) => x.l),
-    }))
-    .filter((x) => x.lines.length > 0);
+  const sections = CUNG_TU_VI.flatMap((cung) => {
+    const p = byName.get(cung.name);
+    if (!p) return [];
+    const lines = [
+      ...p.majorStars.map((s) => ({ s, l: luanGiai[`sao-cung:${s.name}|${p.name}`] ?? luanGiai[`sao:${s.name}`] })),
+      ...p.minorStars.map((s) => ({ s, l: luanGiai[`sao-cung:${s.name}|${p.name}`] })),
+    ].filter((x) => x.l);
+    return [{ palace: p, yNghia: cung.yNghia, lines }];
+  });
 
   return (
     <section className="flex flex-col gap-4">
       <h2 className="text-lg font-semibold">Luận giải</h2>
-      {sections.length === 0 && <p className="text-sm text-muted-foreground">Chưa có lời luận giải nào khớp với lá số này.</p>}
-      {sections.map(({ palace, lines }) => (
+      {sections.map(({ palace, yNghia, lines }) => (
         <div key={palace.name} className="flex flex-col gap-2 rounded-lg border p-4">
-          <h3 className={cn("font-semibold uppercase", palace.name === "Mệnh" && "text-primary")}>
-            Cung {palace.name}
-            {palace.isBody && " · Thân cư"}
-          </h3>
+          <div className="flex flex-col gap-0.5">
+            <h3 className={cn("font-semibold uppercase", palace.name === "Mệnh" && "text-primary")}>
+              Cung {palace.name}
+              {palace.isBody && " · Thân cư"}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {yNghia}
+              {palace.isBody && ` ${THAN_CU}`}
+            </p>
+          </div>
+          {lines.length === 0 && <p className="text-sm italic text-muted-foreground">Chưa có lời luận giải cho các sao ở cung này.</p>}
           <ul className="flex flex-col gap-2 text-sm">
             {lines.map(({ s, l }) => (
               <li key={s.name}>
