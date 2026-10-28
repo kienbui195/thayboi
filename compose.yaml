@@ -1,0 +1,48 @@
+# Chạy trên VPS (/srv/apps/thayboi): cần mạng Docker `appnet` và các file bí mật trong /srv/secrets
+# (thayboi.db.env từ `vps db-create thayboi`, thayboi.admin.env có ADMIN_API_TOKEN cho dashboard).
+# Deploy: git push rồi `vps release thayboi`. Caddy: deploy/thayboi.caddy.
+name: thayboi
+services:
+  thayboi-api:
+    build: ./api
+    image: thayboi-api:latest
+    container_name: thayboi-api
+    restart: unless-stopped
+    env_file:
+      - /srv/secrets/thayboi.db.env
+      - /srv/secrets/thayboi.admin.env
+    environment:
+      PORT: "3000"
+      NODE_ENV: production
+    # Caddy chạy trên máy chủ nên cần một cổng chỉ nghe ở 127.0.0.1 (Caddy chỉ chuyển /api/* vào đây).
+    ports:
+      - "127.0.0.1:3105:3000"
+    networks: [appnet]
+    mem_limit: 256m
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+  thayboi-web:
+    build:
+      context: ./web
+      args:
+        NEXT_PUBLIC_SITE_URL: https://thayboi.banhchungranchaydenxi.click
+    image: thayboi-web:latest
+    container_name: thayboi-web
+    restart: unless-stopped
+    environment:
+      # Trang riêng tư gọi API trong mạng Docker, không đi vòng ra internet
+      API_URL: http://thayboi-api:3000
+    depends_on: [thayboi-api]
+    ports:
+      - "127.0.0.1:3106:3000"
+    networks: [appnet]
+    mem_limit: 256m
+    read_only: true
+    tmpfs: [/tmp, /app/.next/cache]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+networks:
+  appnet:
+    external: true

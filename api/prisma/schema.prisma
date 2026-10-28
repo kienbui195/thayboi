@@ -1,0 +1,111 @@
+// Lược đồ database Thầy Bói (MySQL). Thiết kế: MyDocs/Games/thayboi/03-so-do.md, mục ERD.
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id           Int            @id @default(autoincrement())
+  email        String         @unique @db.VarChar(254)
+  passwordHash String         @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime       @default(now()) @map("created_at")
+  sessions     Session[]
+  profiles     BirthProfile[]
+
+  @@map("users")
+}
+
+/// id là SHA-256 của token trong cookie: lộ DB cũng không dùng lại được phiên.
+model Session {
+  id        String   @id @db.Char(64)
+  userId    Int      @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+/// Lần đăng nhập sai, để chặn sau 5 lần trong 15 phút (AC-01.5).
+model LoginFailure {
+  id    Int      @id @default(autoincrement())
+  email String   @db.VarChar(254)
+  at    DateTime
+
+  @@index([email, at])
+  @@map("login_failures")
+}
+
+enum Gender {
+  male
+  female
+}
+
+/// BR10 "đúng một hồ sơ chính" được chặn trong DB bằng cột sinh `primary_owner` (viết tay trong migration,
+/// Prisma không khai báo được cột sinh): IF(is_primary, user_id, NULL) + UNIQUE.
+model BirthProfile {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  name      String   @db.VarChar(100)
+  birthDate String   @map("birth_date") @db.Char(10) // YYYY-MM-DD dương lịch
+  birthTime String?  @map("birth_time") @db.Char(5) // HH:mm; null = không rõ giờ
+  gender    Gender
+  placeName String   @map("place_name") @db.VarChar(255)
+  latitude  Float
+  longitude Float
+  timezone  String   @db.VarChar(64)
+  isPrimary Boolean  @default(false) @map("is_primary")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  charts    Chart[]
+
+  @@index([userId])
+  @@map("birth_profiles")
+}
+
+enum ChartKind {
+  tu_vi
+  than_so_hoc
+  chiem_tinh
+}
+
+enum ChartStatus {
+  ok
+  skipped
+  error
+}
+
+model Chart {
+  id          Int          @id @default(autoincrement())
+  profileId   Int          @map("profile_id")
+  kind        ChartKind
+  status      ChartStatus
+  data        Json?
+  houseSystem String?      @map("house_system") @db.VarChar(20)
+  calcVersion Int          @map("calc_version")
+  computedAt  DateTime     @map("computed_at")
+  profile     BirthProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, kind])
+  @@map("charts")
+}
+
+/// Lời luận giải, sửa qua dashboard. Khóa dạng `<loại>:<giá trị>`, ví dụ `so:11`, `sao-cung:Tử Vi|Mệnh`.
+/// `mon` và `loai` suy ra từ khóa (xem src/luan-giai/khoa.ts).
+model LuanGiai {
+  id        Int       @id @default(autoincrement())
+  khoa      String    @unique @db.VarChar(191)
+  mon       ChartKind
+  loai      String    @db.VarChar(32)
+  tieuDe    String?   @map("tieu_de") @db.VarChar(200)
+  noiDung   String    @map("noi_dung") @db.Text
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@index([mon, loai])
+  @@map("luan_giai")
+}

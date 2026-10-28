@@ -1,0 +1,23 @@
+# MySQL chạy thử ở laptop cho thayboi-api: docker compose -f dev/compose.yaml up -d
+# Kết nối: mysql://root:dev@127.0.0.1:33063/thayboi_dev (mặc định trong api/prisma.config.ts)
+name: thayboi-dev
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: thayboi-dev-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: dev
+      MYSQL_DATABASE: thayboi_dev
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "127.0.0.1:33063:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-pdev"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+volumes:
+  mysql-data:

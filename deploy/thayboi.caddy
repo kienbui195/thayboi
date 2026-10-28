@@ -1,0 +1,11 @@
+# Bản mẫu của /etc/caddy/sites/thayboi.caddy trên VPS.
+# Web và API cùng domain: chỉ /api/* vào Nest; /admin-api và /healthz không bao giờ được chuyển (chỉ dashboard gọi trong Docker).
+http://thayboi.banhchungranchaydenxi.click {
+	encode gzip zstd
+	handle /api/* {
+		reverse_proxy 127.0.0.1:3105
+	}
+	handle {
+		reverse_proxy 127.0.0.1:3106
+	}
+}

@@ -1,0 +1,50 @@
+{
+  "name": "thayboi-api",
+  "version": "0.1.0",
+  "description": "Máy chủ Thầy Bói: đăng nhập, hồ sơ, lá số, luận giải (NestJS + Prisma + MySQL)",
+  "author": "chungcake69",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "build": "nest build",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:prod": "prisma migrate deploy && node dist/main",
+    "lint": "oxlint --type-aware src/ test/",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "DATABASE_URL=${TEST_DATABASE_URL:-mysql://root:dev@127.0.0.1:33063/thayboi_test} prisma migrate deploy && vitest run --config ./vitest.config.e2e.ts",
+    "prisma:generate": "prisma generate"
+  },
+  "dependencies": {
+    "@nestjs/common": "^12.0.1",
+    "@nestjs/core": "^12.0.1",
+    "@nestjs/platform-express": "^12.0.1",
+    "@prisma/adapter-mariadb": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "astronomy-engine": "^2.1.19",
+    "iztro": "^2.6.3",
+    "luxon": "^3.7.2",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^12.0.0",
+    "@nestjs/schematics": "^12.0.0",
+    "@nestjs/testing": "^12.0.1",
+    "@types/express": "^5.0.0",
+    "@types/luxon": "^3.7.6",
+    "@types/node": "^24.0.0",
+    "@types/supertest": "^7.0.0",
+    "oxlint": "^1.58.0",
+    "oxlint-tsgolint": "^7.0.2001",
+    "prettier": "^3.4.2",
+    "prisma": "7.10.1",
+    "supertest": "^7.0.0",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.0",
+    "vitest": "^4.1.2"
+  }
+}

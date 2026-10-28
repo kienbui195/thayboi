@@ -1,31 +1,41 @@
 # Thầy Bói
 
-Web app xem tử vi, thần số học và chiêm tinh từ một hồ sơ sinh. Tài liệu nghiệp vụ và thiết kế nằm ngoài repo, ở `~/Documents/MyDocs/Games/thayboi/`.
+Web app xem tử vi, thần số học, chiêm tinh. Tài liệu nghiệp vụ và thiết kế nằm ngoài repo, ở `~/Documents/MyDocs/Games/thayboi/`.
+
+| Thư mục | Là gì |
+|---|---|
+| `web/` | Next.js 16 + shadcn/ui: giao diện, trang công khai cho SEO. Không đọc DB, mọi dữ liệu qua API |
+| `api/` | NestJS + Prisma + MySQL: đăng nhập, hồ sơ, tính và lưu lá số, luận giải, `/admin-api` cho dashboard |
+| `dev/` | MySQL chạy thử ở laptop |
+| `deploy/` | Mẫu cấu hình Caddy trên VPS |
+| `compose.yaml` | Chạy cả hai trên VPS |
 
 ## Chạy trên máy
 
 ```bash
-npm install
-cp .env.example .env.local
-npm run db:migrate      # tạo local.db
-npm run dev             # http://localhost:3000
+docker compose -f dev/compose.yaml up -d          # MySQL ở 127.0.0.1:33063
+cd api && npm install && npx prisma migrate deploy && npm run start:dev   # API ở :3000 mặc định, đặt PORT=3001
+cd web && npm install && npm run dev               # http://localhost:3000, chuyển /api/* sang API_URL (mặc định :3001)
 ```
 
-## Lệnh
+Test: `cd api && npm test && npm run test:e2e` (e2e dùng database `thayboi_test`), `cd web && npm test`.
 
-| Lệnh | Việc |
+## Deploy (VPS chung với WordDefender)
+
+`git push` rồi trên laptop chạy `vps release thayboi`. Domain `https://thayboi.banhchungranchaydenxi.click` đi qua Cloudflare Tunnel → Caddy (`deploy/thayboi.caddy`): `/api/*` vào `thayboi-api` (cổng 3105), còn lại vào `thayboi-web` (cổng 3106). Dashboard quản trị: `https://admin.baodom.xyz`, game "Thầy Bói".
+
+## Luận giải
+
+Lời luận giải nằm trong bảng `luan_giai`, sửa trên dashboard (mục "Luận giải"). Khóa dạng `<loại>:<giá trị>`:
+
+| Khóa | Hiện ở |
 |---|---|
-| `npm test` | Unit + integration test (Vitest, DB SQLite tạm) |
-| `npm run typecheck` | Sinh kiểu route rồi chạy `tsc` |
-| `npm run lint` | ESLint |
-| `npm run db:generate` | Sinh migration sau khi sửa `src/lib/db/schema.ts` |
-| `npm run db:migrate` | Áp migration vào `DATABASE_URL` |
-
-## Deploy
-
-- `NEXT_PUBLIC_SITE_URL` phải có **lúc build**: sitemap, robots và ảnh chia sẻ được render tĩnh.
-- DB: Turso (`DATABASE_URL=libsql://…` + `DATABASE_AUTH_TOKEN`), chạy `npm run db:migrate` trước khi deploy bản có migration mới.
+| `so:11` | Thần số học, mọi ô có số 11 |
+| `cung:Bạch Dương` | Chiêm tinh, thẻ Mặt Trời / Mặt Trăng / cung Mọc rơi vào cung đó |
+| `hanh-tinh:Mặt Trăng\|Song Tử` | Chiêm tinh, cột "Luận giải" của bảng thiên thể |
+| `sao:Tử Vi` | Tử vi, chính tinh ở bất kỳ cung nào (khi chưa có dòng riêng cho cung) |
+| `sao-cung:Tử Vi\|Mệnh` | Tử vi, sao đó đóng ở cung đó (ưu tiên hơn `sao:`) |
 
 ## Lưu ý khi sửa cách tính
 
-Sửa bất cứ gì trong `src/lib/charts/` làm kết quả lá số thay đổi thì **tăng số trong `CALC_VERSION`** của môn đó (`src/lib/charts/index.ts`). Lá số đã lưu sẽ hiện tag "Bản cũ" và nút "Tính lại".
+Sửa gì trong `api/src/charts/` làm kết quả lá số thay đổi thì **tăng số trong `CALC_VERSION`** của môn đó (`api/src/charts/index.ts`). Lá số đã lưu sẽ hiện tag "Bản cũ" và nút "Tính lại".
