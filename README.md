@@ -22,7 +22,7 @@ Test: `cd api && npm test && npm run test:e2e` (e2e dùng database `thayboi_test
 
 ## Deploy (VPS chung với WordDefender)
 
-`git push` rồi trên laptop chạy `vps release thayboi`. Domain `https://thayboi.banhchungranchaydenxi.click` đi qua Cloudflare Tunnel → Caddy (`deploy/thayboi.caddy`): `/api/*` vào `thayboi-api` (cổng 3105), còn lại vào `thayboi-web` (cổng 3106). Dashboard quản trị: `https://admin.baodom.xyz`, game "Thầy Bói".
+`git push` rồi trên laptop chạy `vps release thayboi`. Domain `https://thayboi.baodom.xyz` đi qua Cloudflare Tunnel → Caddy (`deploy/thayboi.caddy`): `/api/*` vào `thayboi-api` (cổng 3105), còn lại vào `thayboi-web` (cổng 3106). Dashboard quản trị: `https://admin.baodom.xyz`, game "Thầy Bói".
 
 ## Luận giải
 

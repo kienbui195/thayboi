@@ -27,7 +27,7 @@ services:
     build:
       context: ./web
       args:
-        NEXT_PUBLIC_SITE_URL: https://thayboi.banhchungranchaydenxi.click
+        NEXT_PUBLIC_SITE_URL: https://thayboi.baodom.xyz
     image: thayboi-web:latest
     container_name: thayboi-web
     restart: unless-stopped
