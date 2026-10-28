@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { PageSkeleton } from "@/components/page-skeleton";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ViewingBar } from "@/components/viewing-bar";
@@ -8,7 +10,7 @@ import { resolveViewedProfile } from "@/lib/profiles";
 
 export const metadata: Metadata = { title: "Trang chủ" };
 
-export default async function HomePage({ searchParams }: PageProps<"/trang-chu">) {
+async function HomePageContent({ searchParams }: PageProps<"/trang-chu">) {
   const user = await requireUser();
   const { "ho-so": requested } = await searchParams;
   const { viewed, all } = await resolveViewedProfile(user.id, typeof requested === "string" ? requested : undefined);
@@ -29,5 +31,14 @@ export default async function HomePage({ searchParams }: PageProps<"/trang-chu">
         ))}
       </div>
     </>
+  );
+}
+
+// Mỗi trang tự bọc phần đọc phiên/dữ liệu trong Suspense: khung trang render tĩnh, chuyển trang tức thì (Cache Components)
+export default function HomePage(props: PageProps<"/trang-chu">) {
+  return (
+    <Suspense fallback={<PageSkeleton />}>
+      <HomePageContent {...props} />
+    </Suspense>
   );
 }

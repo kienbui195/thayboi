@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { PageSkeleton } from "@/components/page-skeleton";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -24,7 +26,7 @@ export async function generateMetadata({ params }: PageProps<"/la-so/[mon]">): P
   return { title: m ? `Lá số ${m.name.toLowerCase()}` : "Lá số" };
 }
 
-export default async function ChartPage({ params, searchParams }: PageProps<"/la-so/[mon]">) {
+async function ChartPageContent({ params, searchParams }: PageProps<"/la-so/[mon]">) {
   const m = monBySlug((await params).mon);
   if (!m) notFound();
   const user = await requireUser();
@@ -62,12 +64,21 @@ export default async function ChartPage({ params, searchParams }: PageProps<"/la
           </AlertDescription>
         </Alert>
       ) : m.kind === "tu_vi" ? (
-        <TuViView chart={chart.data as TuViChart} />
+        <TuViView chart={chart.data as TuViChart} name={viewed.name} />
       ) : m.kind === "than_so_hoc" ? (
         <NumerologyView chart={chart.data as NumerologyChart} birthDate={viewed.birthDate} />
       ) : (
         <AstrologyView chart={chart.data as AstrologyChart} />
       )}
     </>
+  );
+}
+
+// Mỗi trang tự bọc phần đọc phiên/dữ liệu trong Suspense: khung trang render tĩnh, chuyển trang tức thì (Cache Components)
+export default function ChartPage(props: PageProps<"/la-so/[mon]">) {
+  return (
+    <Suspense fallback={<PageSkeleton />}>
+      <ChartPageContent {...props} />
+    </Suspense>
   );
 }

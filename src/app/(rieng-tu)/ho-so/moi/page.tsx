@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { PageSkeleton } from "@/components/page-skeleton";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ProfileForm } from "@/components/profile-form";
@@ -8,7 +10,7 @@ import { listProfiles } from "@/lib/profiles";
 
 export const metadata: Metadata = { title: "Thêm hồ sơ" };
 
-export default async function NewProfilePage() {
+async function NewProfilePageContent() {
   const user = await requireUser();
   const count = (await listProfiles(user.id)).length;
   const first = count === 0;
@@ -33,5 +35,14 @@ export default async function NewProfilePage() {
         <ProfileForm cancelHref={first ? undefined : "/ho-so"} />
       )}
     </>
+  );
+}
+
+// Mỗi trang tự bọc phần đọc phiên/dữ liệu trong Suspense: khung trang render tĩnh, chuyển trang tức thì (Cache Components)
+export default function NewProfilePage() {
+  return (
+    <Suspense fallback={<PageSkeleton />}>
+      <NewProfilePageContent />
+    </Suspense>
   );
 }

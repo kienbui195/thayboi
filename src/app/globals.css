@@ -23,6 +23,11 @@
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+  --color-hanh-kim: var(--hanh-kim);
+  --color-hanh-moc: var(--hanh-moc);
+  --color-hanh-thuy: var(--hanh-thuy);
+  --color-hanh-hoa: var(--hanh-hoa);
+  --color-hanh-tho: var(--hanh-tho);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -68,6 +73,12 @@
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.87 0 0);
+  /* Ngũ hành trên lá số tử vi: Kim xám, Mộc xanh lá, Thủy lam đen, Hỏa đỏ, Thổ vàng */
+  --hanh-kim: oklch(0.55 0.01 260);
+  --hanh-moc: oklch(0.52 0.15 150);
+  --hanh-thuy: oklch(0.35 0.12 265);
+  --hanh-hoa: oklch(0.55 0.21 27);
+  --hanh-tho: oklch(0.62 0.14 70);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
@@ -103,6 +114,11 @@
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.87 0 0);
+  --hanh-kim: oklch(0.8 0.01 260);
+  --hanh-moc: oklch(0.75 0.16 150);
+  --hanh-thuy: oklch(0.72 0.12 255);
+  --hanh-hoa: oklch(0.7 0.19 27);
+  --hanh-tho: oklch(0.8 0.14 80);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);

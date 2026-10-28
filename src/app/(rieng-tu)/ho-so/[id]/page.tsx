@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { PageSkeleton } from "@/components/page-skeleton";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProfileForm } from "@/components/profile-form";
@@ -6,7 +8,7 @@ import { getProfile } from "@/lib/profiles";
 
 export const metadata: Metadata = { title: "Sửa hồ sơ" };
 
-export default async function EditProfilePage({ params }: PageProps<"/ho-so/[id]">) {
+async function EditProfilePageContent({ params }: PageProps<"/ho-so/[id]">) {
   const user = await requireUser();
   const profile = await getProfile(user.id, (await params).id);
   if (!profile) notFound(); // hồ sơ của người khác coi như không có (BR7)
@@ -18,5 +20,14 @@ export default async function EditProfilePage({ params }: PageProps<"/ho-so/[id]
       </div>
       <ProfileForm profile={profile} cancelHref="/ho-so" />
     </>
+  );
+}
+
+// Mỗi trang tự bọc phần đọc phiên/dữ liệu trong Suspense: khung trang render tĩnh, chuyển trang tức thì (Cache Components)
+export default function EditProfilePage(props: PageProps<"/ho-so/[id]">) {
+  return (
+    <Suspense fallback={<PageSkeleton />}>
+      <EditProfilePageContent {...props} />
+    </Suspense>
   );
 }

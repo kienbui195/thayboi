@@ -3,6 +3,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { cache } from "react";
 import { db } from "@/lib/db";
 import { sessions, users } from "@/lib/db/schema";
@@ -34,6 +35,8 @@ export async function deleteSession() {
 
 /** Người dùng của request hiện tại, hoặc null. Gọi nhiều lần trong một request chỉ đọc DB một lần. */
 export const getCurrentUser = cache(async () => {
+  // Phiên luôn đọc theo request; báo trước cho Next để được so hạn phiên với giờ hiện tại
+  await connection();
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
   const row = await db

@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { PageSkeleton } from "@/components/page-skeleton";
 import { PencilIcon, PlusIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -12,7 +14,7 @@ import { listProfiles } from "@/lib/profiles";
 
 export const metadata: Metadata = { title: "Hồ sơ của tôi" };
 
-export default async function ProfilesPage() {
+async function ProfilesPageContent() {
   const user = await requireUser();
   const profiles = await listProfiles(user.id);
   if (profiles.length === 0) redirect("/ho-so/moi"); // BR16
@@ -60,5 +62,14 @@ export default async function ProfilesPage() {
         ))}
       </div>
     </>
+  );
+}
+
+// Mỗi trang tự bọc phần đọc phiên/dữ liệu trong Suspense: khung trang render tĩnh, chuyển trang tức thì (Cache Components)
+export default function ProfilesPage() {
+  return (
+    <Suspense fallback={<PageSkeleton />}>
+      <ProfilesPageContent />
+    </Suspense>
   );
 }
